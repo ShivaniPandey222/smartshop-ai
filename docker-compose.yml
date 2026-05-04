@@ -1,0 +1,19 @@
+services:
+  postgres :
+    image: postgres:14.22-trixie
+    environment:
+      POSTGRES_DB: smartshop_users
+      POSTGRES_USER: smartshop
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8.8-m03-trixie
+    ports:
+      - "6379:6379"
+
+volumes:
+    postgres_data:
