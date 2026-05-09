@@ -17,8 +17,9 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) {
     return http.authorizeHttpRequests(auth -> auth
-        .requestMatchers("/auth/register").permitAll()
+        .requestMatchers("/api/auth/register").permitAll()
         .anyRequest().authenticated())
+        .csrf(csrf-> csrf.disable())
         .sessionManagement( session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .httpBasic(Customizer.withDefaults())
