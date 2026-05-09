@@ -21,21 +21,8 @@ public class AuthController {
 
  @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest){
-      if(userService.fetchUser(registerRequest.getEmail())!=null){
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("Email already exists");
-      }
-      try {
-        userService.save(registerRequest);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body("User registered successfully");
-      } catch (DataIntegrityViolationException e){
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body("Email uniqueness constraint voilated");
-      } catch (Exception e){
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Registration failed");
-      }
+      userService.registerUser(registerRequest);
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .body("User Registered successfully");
   }
-
 }
