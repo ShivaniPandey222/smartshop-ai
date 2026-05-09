@@ -17,14 +17,19 @@ public class UserService {
    private final UserRepository userRepository;
 
   public void save(RegisterRequest registerRequest){
-    User user = new User();
+    User user = convertToUser(registerRequest);
+    userRepository.save(user);
+  }
+
+  public User convertToUser(RegisterRequest registerRequest){
+    User user=new User();
     user.setName(registerRequest.getName());
     user.setEmail(registerRequest.getEmail());
     user.setRole(UserRole.valueOf(registerRequest.getRole()));
     user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
     user.setMobileNo(registerRequest.getMobileNo());
     user.setCreatedAt(Instant.now());
-    userRepository.save(user);
+    return user;
   }
 
   public User fetchUser(String email){
