@@ -10,7 +10,18 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  application:
+    name: user-service
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiry: 600000
 
 
-
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
 
