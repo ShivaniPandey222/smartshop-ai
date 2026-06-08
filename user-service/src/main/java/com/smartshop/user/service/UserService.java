@@ -2,6 +2,7 @@ package com.smartshop.user.service;
 
 import com.smartshop.user.dto.RegisterRequest;
 import com.smartshop.user.dto.UpdateProfileRequest;
+import com.smartshop.user.dto.UserProfile;
 import com.smartshop.user.exception.UserAlreadyExistsException;
 import com.smartshop.user.model.User;
 import com.smartshop.user.repository.UserRepository;
@@ -59,5 +60,19 @@ public class UserService {
 
   public List<User> getUser(){
     return userRepository.findAll();
+  }
+
+  public UserProfile fetchUserProfile(String email){
+    User user=fetchUser(email);
+    return convertToUserProfile(user);
+  }
+
+  private UserProfile convertToUserProfile(User user){
+    UserProfile userProfile =new UserProfile();
+    userProfile.setName(user.getName());
+    userProfile.setEmail(user.getEmail());
+    userProfile.setMobileNo(user.getMobileNo());
+    userProfile.setRole(user.getRole());
+    return userProfile;
   }
 }

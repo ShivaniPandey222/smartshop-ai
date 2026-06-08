@@ -4,6 +4,8 @@ import com.smartshop.gateway.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -50,6 +53,15 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
       String token = extractToken(exchange.getRequest());
       try {
         if (token != null && jwtService.validateToken(token)) {
+          if (!CollectionUtils.isEmpty(config.roles)){
+            String userRole = jwtService.extractRoles(token);
+            if(config.roles.contains(userRole)){
+              ServerHttpRequest mutatedRequest = exchange.getRequest().mutate().header("X-User-Roles", userRole).build();
+              exchange=exchange.mutate().request(mutatedRequest).build();
+            }else {
+              return unauthorized(exchange,"{\"error\":\"Does not have permission to access this endpoint\"}");
+            }
+          }
           String username = jwtService.extractUsername(token);
           ServerHttpRequest mutatedRequest = exchange.getRequest().mutate().header("X-User-Id", username).build();
           return chain.filter(exchange.mutate().request(mutatedRequest).build());
@@ -64,7 +76,17 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     };
   }
 
-  public static class Config {
+//  @Override
+//  public List<String> shortcutFieldOrder() {
+//    return List.of("roles");
+//  }
+//
 
+  public static class Config {
+    private List<String> roles;
+
+    public void setRoles(List<String> roles) {
+      this.roles = roles;
+    }
   }
 }

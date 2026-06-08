@@ -16,11 +16,28 @@ spring:
         - id: user-service-protected
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/api/users/**
+            - Path=/api/user/**
           filters:
             - JwtAuthentication             # your custom JWT filter
 
-        # Future services — add as you build them
+      # Protected user routes — JWT required
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/products/**
+            - Method=POST,PUT,DELETE
+          filters:
+             - name: JwtAuthentication
+               args:
+                 roles: SELLER,ADMIN             # your custom JWT filter
+
+        - id: product-service-get-product
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/products/**
+            - Method=GET
+
+      # Future services — add as you build them
         # - id: product-service
         #   uri: lb://PRODUCT-SERVICE
         #   predicates:
