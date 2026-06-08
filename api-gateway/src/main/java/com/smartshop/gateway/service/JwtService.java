@@ -29,4 +29,9 @@ public class JwtService {
       byte[] decodeSecretKey = Decoders.BASE64.decode(secret);
       return Keys.hmacShaKeyFor(decodeSecretKey);
     }
+
+    public String extractRoles(String token){
+      return Jwts.parser().verifyWith(getSigningKey())
+          .build().parseSignedClaims(token).getPayload().get("role", String.class);
+    }
 }
