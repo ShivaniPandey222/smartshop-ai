@@ -36,13 +36,6 @@ spring:
           predicates:
             - Path=/api/products/**
             - Method=GET
-
-      # Future services — add as you build them
-        # - id: product-service
-        #   uri: lb://PRODUCT-SERVICE
-        #   predicates:
-        #     - Path=/api/products/**
-
 eureka:
   client:
     service-url:
