@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,8 +19,8 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
-  public List<ProductResponse> fetchAllProducts(){
-    List<Product> products = productRepository.findAll();
+  public List<ProductResponse> fetchAllProducts(Pageable pageable){
+    List<Product> products = (List<Product>) productRepository.findAll(pageable);
     return products.stream().map(this::convertToProductResponse).toList();
   }
 
@@ -60,8 +61,8 @@ public class ProductService {
     productRepository.save(product);
   }
 
-  public List<ProductResponse> fetchProductByName(String name){
-    List<Product> product=productRepository.findByNameLikeIgnoreCase("%"+name+"%");
+  public List<ProductResponse> fetchProductByName(String name, Pageable pageable){
+    List<Product> product=productRepository.findByNameLikeIgnoreCase("%"+name+"%",pageable);
     return product.stream().map(this::convertToProductResponse).toList();
   }
 

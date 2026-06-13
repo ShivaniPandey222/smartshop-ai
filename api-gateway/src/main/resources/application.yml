@@ -42,6 +42,10 @@ spring:
           predicates:
             - Path=/api/category/**
             - Method=POST
+          filters:
+            - name: JwtAuthentication
+              args:
+                roles: SELLER,ADMIN
 
 eureka:
   client:
