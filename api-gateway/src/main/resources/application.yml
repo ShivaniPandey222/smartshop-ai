@@ -25,7 +25,7 @@ spring:
           uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/api/products/**
-            - Method=POST,PUT,DELETE
+            - Method=POST,PUT,DELETE,PATCH
           filters:
              - name: JwtAuthentication
                args:
@@ -36,6 +36,17 @@ spring:
           predicates:
             - Path=/api/products/**
             - Method=GET
+
+        - id: product-service-category
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/category/**
+            - Method=POST
+          filters:
+            - name: JwtAuthentication
+              args:
+                roles: SELLER,ADMIN
+
 eureka:
   client:
     service-url:

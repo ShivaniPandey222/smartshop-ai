@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
   public ResponseEntity productNotFound(ProductNotFoundException exception){
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
   }
+
+  @ExceptionHandler(IllegalCallerException.class)
+  public ResponseEntity invalidCallerException(IllegalCallerException exception){
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+  }
 }
