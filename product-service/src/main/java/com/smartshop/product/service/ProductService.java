@@ -10,6 +10,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +22,13 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
+  @Cacheable(value = "products" , key = "#p0.pageNumber + ':' + #p0.pageSize + ':' + #p0.sort")
   public List<ProductResponse> fetchAllProducts(Pageable pageable){
-    List<Product> products = (List<Product>) productRepository.findAll(pageable);
-    return products.stream().map(this::convertToProductResponse).toList();
+    return productRepository.findAll(pageable).stream()
+        .map(this::convertToProductResponse).toList();
   }
 
+  @Cacheable(value = "productById", key = "#p0")
   public ProductResponse fetchProductById(UUID id){
 
     Product product= findProductById(id);
@@ -35,11 +40,16 @@ public class ProductService {
         .orElseThrow(() -> new ProductNotFoundException(id + " product not found"));
   }
 
+  @CacheEvict(value = "products" , allEntries = true)
   public void addProduct(ProductRequest request,String email){
     Product product = convertToProduct(request,email);
     productRepository.save(product);
   }
 
+  @Caching(evict= {
+      @CacheEvict(value = "products", allEntries = true),
+      @CacheEvict(value = "productById", key = "#p0")
+  })
   public void deleteProduct(UUID id, String email){
     Product product = findProductById(id);
     if(!product.getSellerEmail().equals(email)){
@@ -48,7 +58,11 @@ public class ProductService {
     productRepository.delete(product);
   }
 
-  public void modifyProduct(ProductRequest request,UUID id, String email){
+  @Caching(evict= {
+      @CacheEvict(value = "products", allEntries = true),
+      @CacheEvict(value = "productById", key = "#p1")
+  })
+  public void modifyProduct(ProductRequest request, UUID id, String email){
     Product product = findProductById(id);
     if(!product.getSellerEmail().equals(email)){
       throw new IllegalCallerException("Product does not belong to the sender");

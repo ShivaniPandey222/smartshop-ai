@@ -1,14 +1,7 @@
 package com.smartshop.product.dto;
 
-import com.smartshop.product.model.Category;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotBlank;
-import java.time.Instant;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
@@ -18,7 +11,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class ProductResponse {
+public class ProductResponse implements Serializable {
+
+  @Serial
+  private static final long serialVersionUID = 1L;
 
   private UUID id;
 
