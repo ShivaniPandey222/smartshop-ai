@@ -24,7 +24,7 @@ spring:
     type: redis
     redis:
       time-to-live: 600000
-      cache-null-value: false
+      cache-null-values: false
 
 
   kafka:
