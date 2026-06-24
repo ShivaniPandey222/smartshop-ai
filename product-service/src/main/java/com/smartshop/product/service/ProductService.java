@@ -2,14 +2,20 @@ package com.smartshop.product.service;
 
 import com.smartshop.product.dto.ProductRequest;
 import com.smartshop.product.dto.ProductResponse;
+import com.smartshop.product.event.ProductEventProducer;
+import com.smartshop.product.event.ProductUpdatedEvent;
 import com.smartshop.product.exception.ProductNotFoundException;
 import com.smartshop.product.model.Category;
 import com.smartshop.product.model.Product;
 import com.smartshop.product.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +24,15 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
   private final ProductRepository productRepository;
+  private final ProductEventProducer eventProducer;
 
+  @Cacheable(value = "products" , key = "#p0.pageNumber + ':' + #p0.pageSize + ':' + #p0.sort")
   public List<ProductResponse> fetchAllProducts(Pageable pageable){
-    List<Product> products = (List<Product>) productRepository.findAll(pageable);
-    return products.stream().map(this::convertToProductResponse).toList();
+    return productRepository.findAll(pageable).stream()
+        .map(this::convertToProductResponse).toList();
   }
 
+  @Cacheable(value = "productById", key = "#p0")
   public ProductResponse fetchProductById(UUID id){
 
     Product product= findProductById(id);
@@ -35,20 +44,32 @@ public class ProductService {
         .orElseThrow(() -> new ProductNotFoundException(id + " product not found"));
   }
 
+  @CacheEvict(value = "products" , allEntries = true)
   public void addProduct(ProductRequest request,String email){
     Product product = convertToProduct(request,email);
     productRepository.save(product);
+    eventProducer.publishProductUpdated(product, "CREATED");
   }
 
+  @Caching(evict= {
+      @CacheEvict(value = "products", allEntries = true),
+      @CacheEvict(value = "productById", key = "#p0")
+  })
+  @Transactional
   public void deleteProduct(UUID id, String email){
     Product product = findProductById(id);
     if(!product.getSellerEmail().equals(email)){
       throw new IllegalCallerException("Product does not belong to the sender");
     }
     productRepository.delete(product);
+    eventProducer.publishProductUpdated(product, "DELETED");
   }
 
-  public void modifyProduct(ProductRequest request,UUID id, String email){
+  @Caching(evict= {
+      @CacheEvict(value = "products", allEntries = true),
+      @CacheEvict(value = "productById", key = "#p1")
+  })
+  public void modifyProduct(ProductRequest request, UUID id, String email){
     Product product = findProductById(id);
     if(!product.getSellerEmail().equals(email)){
       throw new IllegalCallerException("Product does not belong to the sender");
@@ -59,6 +80,7 @@ public class ProductService {
     if(request.getCategory()!=null) product.setCategory(request.getCategory());
     if(request.getPrice()!=null) product.setPrice(request.getPrice());
     productRepository.save(product);
+    eventProducer.publishProductUpdated(product, "UPDATED");
   }
 
   public List<ProductResponse> fetchProductByName(String name, Pageable pageable){

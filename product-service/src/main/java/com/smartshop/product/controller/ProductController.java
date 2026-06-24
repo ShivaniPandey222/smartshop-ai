@@ -50,7 +50,7 @@ public class ProductController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ProductResponse> fetchProductByID(@PathVariable("id") UUID id){
-      return ResponseEntity.ok().body(productService.fetchProductById(id));
+    return ResponseEntity.ok().body(productService.fetchProductById(id));
   }
 
   @DeleteMapping("/{id}")
