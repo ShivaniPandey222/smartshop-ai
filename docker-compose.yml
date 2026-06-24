@@ -52,6 +52,19 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: mykafka:29092
 
+  mongo:
+    image: arm64v8/mongo:8-noble
+    container_name: mongodb
+    ports:
+        - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: smartshop_read
+      MONGO_INITDB_ROOT_USERNAME: smartshop
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+        - mongo_data:/data/db
+
 volumes:
     postgres_user_data:
     postgres_product_data:
+    mongo_data:

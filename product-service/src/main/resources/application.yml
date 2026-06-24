@@ -39,6 +39,14 @@ spring:
         properties:
           spring.json.trusted.packages: "com.smartshop.product.event"
 
+  mongodb:
+    host: localhost
+    port: 27017
+    database: smartshop_read
+    username: smartshop
+    password: secret
+    authentication-database: admin
+
 eureka:
   client:
     service-url:
